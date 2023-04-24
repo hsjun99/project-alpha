@@ -17,11 +17,16 @@ class ChatCubit extends Cubit<ChatState> {
 
   late final String _roomId;
   late final String _myUserId;
+  late final String _prompt;
 
-  void setMessagesListener(String roomId) {
+  void setMessagesListener(String roomId) async {
     _roomId = roomId;
 
     _myUserId = supabase.auth.currentUser!.id;
+
+    _prompt = (await supabase.from('rooms').select('''
+          chat_models ( prompt )
+        ''').eq('id', roomId).single())['chat_models']['prompt'];
 
     _messagesSubscription = supabase
         .from('messages')
@@ -55,14 +60,22 @@ class ChatCubit extends Cubit<ChatState> {
     _messages.insert(0, message);
     emit(ChatLoaded(_messages));
 
-    Stream chatStream = await GPT().getChatStream(message.content);
-
-    chatStream.listen((chatStreamEvent) {
-      log(chatStreamEvent.choices[0].delta.content ?? ''); // ...
-    });
-
     try {
       await supabase.from('messages').insert(message.toMap());
+      final response = (await GPT().getChatResponse(_prompt + '\n' + message.content))
+          .choices[0]
+          .message
+          .content;
+      log(response);
+      final gptMessage = Message(
+        id: 'new',
+        roomId: _roomId,
+        content: response,
+        createdAt: DateTime.now(),
+        isMine: false,
+      );
+      _messages.insert(0, gptMessage);
+      await supabase.from('messages').insert(gptMessage.toMap());
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');

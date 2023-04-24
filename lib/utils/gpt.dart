@@ -38,4 +38,18 @@ class GPT {
 
     return chatStream;
   }
+
+  Future<OpenAIChatCompletionModel> getChatResponse(String query) async {
+    OpenAIChatCompletionModel chatCompletion = await OpenAI.instance.chat.create(
+      model: "gpt-3.5-turbo",
+      messages: [
+        OpenAIChatCompletionChoiceMessageModel(
+          content: query,
+          role: OpenAIChatMessageRole.user,
+        ),
+      ],
+    );
+
+    return chatCompletion;
+  }
 }

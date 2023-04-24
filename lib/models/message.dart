@@ -2,7 +2,7 @@ class Message {
   Message({
     required this.id,
     required this.roomId,
-    required this.profileId,
+    this.profileId,
     required this.content,
     required this.createdAt,
     required this.isMine,
@@ -12,7 +12,7 @@ class Message {
   final String id;
 
   /// ID of the user who posted the message
-  final String profileId;
+  final String? profileId;
 
   /// ID of the room the message belongs to
   final String roomId;
