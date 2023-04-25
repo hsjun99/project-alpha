@@ -8,7 +8,9 @@ import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
 import 'package:project_alpha/models/chat_model.dart';
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
+import 'package:project_alpha/utils/elevenlabs_audio.dart';
 import 'package:project_alpha/utils/gpt.dart';
+import 'package:project_alpha/utils/speechplayer.dart';
 
 part 'chat_state.dart';
 
@@ -98,7 +100,13 @@ class ChatCubit extends Cubit<ChatState> {
         isMine: false,
       );
       _messages.insert(0, gptMessage);
-      await supabase.from('messages').insert(gptMessage.toMap());
+      await Future.wait([
+        SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content)),
+        supabase.from('messages').insert(gptMessage.toMap()),
+      ]);
+      log("FINISHED!!!!!");
+      // await SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content));
+      // await supabase.from('messages').insert(gptMessage.toMap());
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');
