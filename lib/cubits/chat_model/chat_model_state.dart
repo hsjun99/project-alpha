@@ -10,5 +10,5 @@ class ChatModelsLoaded extends ChatModelsState {
     required this.models,
   });
 
-  final Map<String, ChatModel?> models;
+  final Map<String, ChatModel> models;
 }

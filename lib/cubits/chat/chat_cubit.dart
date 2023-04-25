@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
 import 'package:project_alpha/utils/gpt.dart';
@@ -12,21 +14,28 @@ part 'chat_state.dart';
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit() : super(ChatInitial());
 
+  // final ChatModelsCubit chatModelsCubit;
+
   StreamSubscription<List<Message>>? _messagesSubscription;
   List<Message> _messages = [];
 
   late final String _roomId;
   late final String _myUserId;
-  late final String _prompt;
+  // late final String _prompt;
+  late final String _modelId;
+  late final String _modelPrompt;
 
   void setMessagesListener(String roomId) async {
     _roomId = roomId;
 
     _myUserId = supabase.auth.currentUser!.id;
 
-    _prompt = (await supabase.from('rooms').select('''
-          chat_models ( prompt )
-        ''').eq('id', roomId).single())['chat_models']['prompt'];
+    final data = (await supabase.from('rooms').select('''
+          chat_models ( id, prompt )
+        ''').eq('id', roomId).single())['chat_models'];
+
+    _modelId = data['id'];
+    _modelPrompt = data['prompt'];
 
     _messagesSubscription = supabase
         .from('messages')
@@ -62,14 +71,16 @@ class ChatCubit extends Cubit<ChatState> {
 
     try {
       await supabase.from('messages').insert(message.toMap());
-      final response = (await GPT().getChatResponse(_prompt + '\n' + message.content))
+
+      final response = (await GPT().getChatResponse(_modelPrompt + '\n' + message.content))
           .choices[0]
           .message
           .content;
-      log(response);
+
       final gptMessage = Message(
         id: 'new',
         roomId: _roomId,
+        modelId: _modelId,
         content: response,
         createdAt: DateTime.now(),
         isMine: false,

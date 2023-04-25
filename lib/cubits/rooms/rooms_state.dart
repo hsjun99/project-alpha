@@ -6,19 +6,18 @@ abstract class RoomState {}
 class RoomsLoading extends RoomState {}
 
 class RoomsLoaded extends RoomState {
-  final List<ChatModel> newModels;
+  // final List<ChatModel> newModels;
   final List<Room> rooms;
 
   RoomsLoaded({
     required this.rooms,
-    required this.newModels,
   });
 }
 
 class RoomsEmpty extends RoomState {
-  final List<ChatModel> newModels;
+  // final List<ChatModel> newModels;
 
-  RoomsEmpty({required this.newModels});
+  RoomsEmpty();
 }
 
 class RoomsError extends RoomState {

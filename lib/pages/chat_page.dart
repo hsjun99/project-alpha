@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_alpha/components/user_avatar.dart';
 import 'package:project_alpha/cubits/chat/chat_cubit.dart';
+import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
+import 'package:project_alpha/models/chat_model.dart';
 
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
@@ -15,6 +19,14 @@ class ChatPage extends StatelessWidget {
 
   static Route<void> route(String roomId) {
     return MaterialPageRoute(
+      // builder: (context) => MultiBlocProvider(providers: [
+      //       BlocProvider<ChatModelsCubit>(create: (context) => ChatModelsCubit()),
+      //       BlocProvider<ChatCubit>(
+      //         create: (context) => ChatCubit(BlocProvider.of<ChatModelsCubit>(context))
+      //           ..setMessagesListener(roomId),
+      //       ),
+      //     ], child: const ChatPage()));
+      // }
       builder: (context) => BlocProvider<ChatCubit>(
         create: (context) => ChatCubit()..setMessagesListener(roomId),
         child: const ChatPage(),
@@ -24,6 +36,7 @@ class ChatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log("INIT CHAT");
     return Scaffold(
       appBar: AppBar(title: const Text('Chat')),
       body: BlocConsumer<ChatCubit, ChatState>(
@@ -34,8 +47,10 @@ class ChatPage extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is ChatInitial) {
+            log("CHAT_NOT_LOADED!!!");
             return preloader;
           } else if (state is ChatLoaded) {
+            log("CHAT_LOADED!!!");
             final messages = state.messages;
             return Column(
               children: [
@@ -115,7 +130,7 @@ class _MessageBarState extends State<_MessageBar> {
               ),
             ),
             TextButton(
-              onPressed: () => _submitMessage(),
+              onPressed: () => _submitMessage(context),
               child: const Text('Send'),
             ),
           ],
@@ -136,7 +151,7 @@ class _MessageBarState extends State<_MessageBar> {
     super.dispose();
   }
 
-  void _submitMessage() async {
+  void _submitMessage(context) async {
     final text = _textController.text;
     if (text.isEmpty) {
       return;

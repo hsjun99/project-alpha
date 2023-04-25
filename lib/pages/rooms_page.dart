@@ -19,8 +19,18 @@ class RoomsPage extends StatelessWidget {
 
   static Route<void> route() {
     return MaterialPageRoute(
-      builder: (context) => BlocProvider<RoomCubit>(
-        create: (context) => RoomCubit()..initializeRooms(context),
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider<RoomCubit>(
+            create: (context) => RoomCubit()..initializeRooms(context),
+          ),
+          BlocProvider<ChatModelsCubit>(
+            create: (context) => ChatModelsCubit()..initializeChatModels(context),
+          ),
+          BlocProvider<ProfilesCubit>(
+            create: (context) => ProfilesCubit()..setMyProfile(),
+          ),
+        ],
         child: const RoomsPage(),
       ),
     );
@@ -28,7 +38,7 @@ class RoomsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<ProfilesCubit>(context).setMyProfile();
+    // BlocProvider.of<ProfilesCubit>(context).setMyProfile();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Rooms'),
@@ -51,18 +61,18 @@ class RoomsPage extends StatelessWidget {
             return preloader;
           } else if (state is RoomsLoaded) {
             // final newUsers = state.new;
-            final newModels = state.newModels;
+            // final newModels = state.newModels;
             final rooms = state.rooms;
-            log(newModels[0].name);
+            // log(newModels[0].name);
             return BlocBuilder<ChatModelsCubit, ChatModelsState>(
               builder: (context, state) {
                 if (state is ChatModelsLoaded) {
-                  log("chatmodelsloaded");
                   final models = state.models;
-                  // final profiles = state.profiles;
+                  log("chatmodelsloaded");
+
                   return Column(
                     children: [
-                      _NewModels(newModels: newModels),
+                      _NewModels(newModels: models.values.toList()),
                       Expanded(
                         child: ListView.builder(
                           itemCount: rooms.length,
@@ -99,16 +109,26 @@ class RoomsPage extends StatelessWidget {
             );
           } else if (state is RoomsEmpty) {
             // final newUsers = state.newUsers;
-            final newModels = state.newModels;
-            return Column(
-              children: [
-                _NewModels(newModels: newModels),
-                const Expanded(
-                  child: Center(
-                    child: Text('Start a chat by tapping on available users'),
-                  ),
-                ),
-              ],
+            // final newModels = state.newModels;
+            return BlocBuilder<ChatModelsCubit, ChatModelsState>(
+              builder: (context, state) {
+                if (state is ChatModelsLoaded) {
+                  final models = state.models;
+                  log("chatmodelsloaded");
+                  return Column(
+                    children: [
+                      _NewModels(newModels: models.values.toList()),
+                      const Expanded(
+                        child: Center(
+                          child: Text('Start a chat by tapping on available users'),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return preloader;
+                }
+              },
             );
           } else if (state is RoomsError) {
             return Center(child: Text(state.message));

@@ -22,7 +22,7 @@ class RoomCubit extends Cubit<RoomState> {
 
   /// List of new users of the app for the user to start talking to
   late final List<Profile> _newUsers;
-  late final List<ChatModel> _newModels;
+  // late final List<ChatModel> _newModels;
 
   /// List of rooms
   List<Room> _rooms = [];
@@ -47,19 +47,21 @@ class RoomCubit extends Cubit<RoomState> {
       emit(RoomsError('Error loading new users'));
     }
 
-    final rows = List<Map<String, dynamic>>.from(data);
-    _newModels = rows.map(ChatModel.fromMap).toList();
+    // final rows = List<Map<String, dynamic>>.from(data);
+    // _newModels = rows.map(ChatModel.fromMap).toList();
 
-    _newModels.asMap().forEach((key, value) {
-      BlocProvider.of<ChatModelsCubit>(context).getModel(value.id);
-    });
-    log("AAAA");
+    // _newModels.asMap().forEach((key, value) {
+    //   BlocProvider.of<ChatModelsCubit>(context).getModel(value.id);
+    // });
+
+    // BlocProvider.of<ChatModelsCubit>(context).initializeChatModels();
+
     final List<Room> _rooms =
         (await supabase.from('rooms').select().match({'profile_id': _myUserId}))
             .map<Room>((e) => Room.fromModel(e))
             .toList();
-    log("BBBBBB");
-    emit(RoomsLoaded(rooms: _rooms, newModels: _newModels));
+
+    emit(RoomsLoaded(rooms: _rooms));
 
     // _rawRoomsSubscription = supabase.from('rooms').stream(
     //   primaryKey: ['room_id', 'profile_id'],
@@ -151,8 +153,6 @@ class RoomCubit extends Cubit<RoomState> {
 
   /// Creates or returns an existing roomID of both participants
   Future<String> createRoom(String chatModelId, String profileId) async {
-    log("CREATE_ROOM!!!!");
-    log(chatModelId);
     try {
       final rooms = await supabase
           .from('rooms')
@@ -163,11 +163,11 @@ class RoomCubit extends Cubit<RoomState> {
         final data = await supabase
             .from('rooms')
             .insert({'profile_id': profileId, 'chat_model_id': chatModelId});
-        emit(RoomsLoaded(rooms: _rooms, newModels: _newModels));
+        emit(RoomsLoaded(rooms: _rooms));
         return data as String;
       }
 
-      emit(RoomsLoaded(rooms: _rooms, newModels: _newModels));
+      emit(RoomsLoaded(rooms: _rooms));
 
       return rooms['id'] as String;
     } catch (e) {
