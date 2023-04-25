@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_alpha/components/model_avatar.dart';
 import 'package:project_alpha/components/user_avatar.dart';
 import 'package:project_alpha/cubits/chat/chat_cubit.dart';
 import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
@@ -19,14 +20,6 @@ class ChatPage extends StatelessWidget {
 
   static Route<void> route(String roomId) {
     return MaterialPageRoute(
-      // builder: (context) => MultiBlocProvider(providers: [
-      //       BlocProvider<ChatModelsCubit>(create: (context) => ChatModelsCubit()),
-      //       BlocProvider<ChatCubit>(
-      //         create: (context) => ChatCubit(BlocProvider.of<ChatModelsCubit>(context))
-      //           ..setMessagesListener(roomId),
-      //       ),
-      //     ], child: const ChatPage()));
-      // }
       builder: (context) => BlocProvider<ChatCubit>(
         create: (context) => ChatCubit()..setMessagesListener(roomId),
         child: const ChatPage(),
@@ -171,8 +164,11 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ChatCubit chatCubit = BlocProvider.of<ChatCubit>(context);
+    // log(chatCubit.state.toString());
+
     List<Widget> chatContents = [
-      if (!message.isMine) UserAvatar(userId: message.profileId ?? ''),
+      if (!message.isMine) ModelAvatar(modelId: message.profileId ?? ''),
       const SizedBox(width: 12),
       Flexible(
         child: Container(

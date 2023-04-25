@@ -47,7 +47,7 @@ class Message {
         modelId = map['model_id'],
         content = map['content'],
         createdAt = DateTime.parse(map['created_at']),
-        isMine = myUserId == map['profile_id'];
+        isMine = map['profile_id'] != null;
 
   Message copyWith({
     String? id,

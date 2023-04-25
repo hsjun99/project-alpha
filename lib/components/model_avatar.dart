@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_alpha/cubits/chat/chat_cubit.dart';
 import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
 import 'package:project_alpha/cubits/profiles/profiles_cubit.dart';
 import 'package:project_alpha/utils/constants.dart';
@@ -16,10 +19,10 @@ class ModelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatModelsCubit, ChatModelsState>(
+    return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
-        if (state is ChatModelsLoaded) {
-          final model = state.models[modelId];
+        if (state is ChatLoaded) {
+          final model = state.chatModel;
           return CircleAvatar(
             child: model == null ? preloader : Text(model.name.substring(0, 2)),
           );

@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
+import 'package:project_alpha/models/chat_model.dart';
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
 import 'package:project_alpha/utils/gpt.dart';
@@ -22,8 +23,12 @@ class ChatCubit extends Cubit<ChatState> {
   late final String _roomId;
   late final String _myUserId;
   // late final String _prompt;
-  late final String _modelId;
-  late final String _modelPrompt;
+  // late final String _modelId;
+  // late final String _modelPrompt;
+  // late final String _modelName;
+  late final ChatModel _chatModel;
+
+  // String getModelName() => _modelName;
 
   void setMessagesListener(String roomId) async {
     _roomId = roomId;
@@ -31,11 +36,18 @@ class ChatCubit extends Cubit<ChatState> {
     _myUserId = supabase.auth.currentUser!.id;
 
     final data = (await supabase.from('rooms').select('''
-          chat_models ( id, prompt )
+          chat_models ( id, name, prompt, created_at )
         ''').eq('id', roomId).single())['chat_models'];
 
-    _modelId = data['id'];
-    _modelPrompt = data['prompt'];
+    // _modelId = ;
+    // _modelName = data['name'];
+    // _modelPrompt = data['prompt'];
+
+    _chatModel = ChatModel(
+        id: data['id'],
+        name: data['name'],
+        prompt: data['prompt'],
+        createdAt: DateTime.parse(data['created_at']));
 
     _messagesSubscription = supabase
         .from('messages')
@@ -51,7 +63,7 @@ class ChatCubit extends Cubit<ChatState> {
           if (_messages.isEmpty) {
             emit(ChatEmpty());
           } else {
-            emit(ChatLoaded(_messages));
+            emit(ChatLoaded(_messages, _chatModel));
           }
         });
   }
@@ -67,12 +79,12 @@ class ChatCubit extends Cubit<ChatState> {
       isMine: true,
     );
     _messages.insert(0, message);
-    emit(ChatLoaded(_messages));
+    emit(ChatLoaded(_messages, _chatModel));
 
     try {
       await supabase.from('messages').insert(message.toMap());
 
-      final response = (await GPT().getChatResponse(_modelPrompt + '\n' + message.content))
+      final response = (await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content))
           .choices[0]
           .message
           .content;
@@ -80,7 +92,7 @@ class ChatCubit extends Cubit<ChatState> {
       final gptMessage = Message(
         id: 'new',
         roomId: _roomId,
-        modelId: _modelId,
+        modelId: _chatModel.id,
         content: response,
         createdAt: DateTime.now(),
         isMine: false,
@@ -90,7 +102,7 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');
-      emit(ChatLoaded(_messages));
+      emit(ChatLoaded(_messages, _chatModel));
     }
   }
 
