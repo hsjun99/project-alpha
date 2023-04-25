@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_alpha/components/audio_recorder.dart';
 import 'package:project_alpha/components/model_avatar.dart';
 import 'package:project_alpha/components/user_avatar.dart';
 import 'package:project_alpha/cubits/chat/chat_cubit.dart';
@@ -37,7 +38,7 @@ class ChatPage extends StatelessWidget {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.0),
-            child: Center(child: ClickableMicIcon()),
+            child: Center(child: AudioRecorder()),
           ),
         ],
       ),

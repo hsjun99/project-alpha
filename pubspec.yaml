@@ -14,9 +14,11 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.2
   flutter_dotenv: ^5.0.2
+  flutter_sound: ^9.2.13
   just_audio: ^0.9.32
   mic_stream: ^0.6.5
   path_provider: ^2.0.14
+  permission_handler: ^10.2.0
   supabase_flutter: ^1.7.0
   timeago: ^3.4.0
 
