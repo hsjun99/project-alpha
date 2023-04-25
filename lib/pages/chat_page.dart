@@ -10,6 +10,7 @@ import 'package:project_alpha/models/chat_model.dart';
 
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
+import 'package:project_alpha/widgets/icons.dart';
 import 'package:timeago/timeago.dart';
 
 /// Page to chat with someone.
@@ -31,7 +32,15 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     log("INIT CHAT");
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
+      appBar: AppBar(
+        title: const Text('Chat'),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Center(child: ClickableMicIcon()),
+          ),
+        ],
+      ),
       body: BlocConsumer<ChatCubit, ChatState>(
         listener: (context, state) {
           if (state is ChatError) {
