@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_openai/openai.dart';
+import 'package:flutter/material.dart';
 
 class GPT {
   Future<void> test() async {
@@ -51,5 +53,14 @@ class GPT {
     );
 
     return chatCompletion;
+  }
+
+  Future<OpenAIAudioModel> getTranscript(File audioFile) async {
+    OpenAIAudioModel transcription = await OpenAI.instance.audio.createTranscription(
+      file: audioFile /* THE AUDIO FILE HERE */,
+      model: "whisper-1",
+      responseFormat: OpenAIAudioResponseFormat.json,
+    );
+    return transcription;
   }
 }
