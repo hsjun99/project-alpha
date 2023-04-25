@@ -70,6 +70,37 @@ class ChatCubit extends Cubit<ChatState> {
         });
   }
 
+  Future<void> sendGPT(Message message) async {
+    final response = (await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content))
+        .choices[0]
+        .message
+        .content;
+
+    final gptMessage = Message(
+      id: 'new',
+      roomId: _roomId,
+      modelId: _chatModel.id,
+      content: response,
+      createdAt: DateTime.now(),
+      isMine: false,
+    );
+
+    _messages.insert(0, gptMessage);
+
+    try {
+      await Future.wait([
+        SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content)),
+        supabase.from('messages').insert(gptMessage.toMap()),
+      ]);
+
+      emit(ChatLoaded(_messages, _chatModel));
+
+      log("FINISHED!!!!!");
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   Future<void> sendMessage(String text) async {
     /// Add message to present to the user right away
     final message = Message(
@@ -85,28 +116,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     try {
       await supabase.from('messages').insert(message.toMap());
-
-      final response = (await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content))
-          .choices[0]
-          .message
-          .content;
-
-      final gptMessage = Message(
-        id: 'new',
-        roomId: _roomId,
-        modelId: _chatModel.id,
-        content: response,
-        createdAt: DateTime.now(),
-        isMine: false,
-      );
-      _messages.insert(0, gptMessage);
-      await Future.wait([
-        SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content)),
-        supabase.from('messages').insert(gptMessage.toMap()),
-      ]);
-      log("FINISHED!!!!!");
-      // await SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content));
-      // await supabase.from('messages').insert(gptMessage.toMap());
+      await sendGPT(message);
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');

@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:elevenlabs/elevenlabs.dart';
 
 class ElevenLabsAudio {
-  Future<File> generateAudioFile(String text, {String voiceId = 'ErXwobaYiN019PkySvjV'}) async {
+  Future<File> generateAudioFile(String text, {String voiceId = 'Lj09yMzlH4fLJGCilzUR'}) async {
     final File file = await ElevenLabs.instance.create(
       text: text,
       voiceId: voiceId,
-      fileName: "NewFile",
+      fileName: 'elevenlabs-${DateTime.now().millisecondsSinceEpoch}.mp3',
       stability: 1.0,
       similarityBoost: 1.0,
     );
