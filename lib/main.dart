@@ -1,4 +1,5 @@
 import 'package:dart_openai/openai.dart';
+import 'package:elevenlabs/elevenlabs.dart';
 import 'package:flutter/material.dart';
 import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
 import 'package:project_alpha/utils/constants.dart';
@@ -16,16 +17,15 @@ Future<void> main() async {
 
   await dotenv.load(fileName: ".env");
 
-  OpenAI.apiKey = dotenv.env['OPENAI_API_KEY'] ?? "";
-
-  // log("helloworld");
-  // await GPT().test();
-  // await GPT().testChat();
+  OpenAI.apiKey = OpenAIAPIKey;
 
   await Supabase.initialize(
     url: SupabaseProjectURL,
     anonKey: SupabaseAnonKey,
   );
+
+  await ElevenLabs.init(apiKey: ElevenLabsAPIKey);
+
   runApp(const MyApp());
 }
 

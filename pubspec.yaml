@@ -7,7 +7,9 @@ environment:
   sdk: ">=3.1.0-35.0.dev <4.0.0"
 
 dependencies:
+  audioplayers: ^4.0.1
   dart_openai: ^1.9.1
+  elevenlabs: ^1.0.10
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.2

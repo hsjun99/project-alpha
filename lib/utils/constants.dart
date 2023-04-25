@@ -8,6 +8,8 @@ final SupabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
 final OpenAIAPIKey = dotenv.env['OPENAI_API_KEY'] ?? '';
 
+final ElevenLabsAPIKey = dotenv.env['ELEVENLABS_API_KEY'] ?? '';
+
 /// Supabase client
 final supabase = Supabase.instance.client;
 

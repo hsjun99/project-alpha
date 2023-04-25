@@ -42,6 +42,8 @@ class GPT {
   }
 
   Future<OpenAIChatCompletionModel> getChatResponse(String query) async {
+    log("starting GPT");
+    log(query);
     OpenAIChatCompletionModel chatCompletion = await OpenAI.instance.chat.create(
       model: "gpt-3.5-turbo",
       messages: [
@@ -51,6 +53,7 @@ class GPT {
         ),
       ],
     );
+    log("GPT: ${chatCompletion.choices[0].message.content}");
 
     return chatCompletion;
   }
