@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_alpha/cubits/chat/chat_cubit.dart';
 import 'package:project_alpha/utils/realtime_audio.dart';
 
 class CustomIcons {
@@ -15,9 +17,15 @@ class _ClickableMicIconState extends State<ClickableMicIcon> {
 
   @override
   Widget build(BuildContext context) {
+    ChatCubit chatCubit = context.read<ChatCubit>();
     return GestureDetector(
       onTap: () {
         setState(() {
+          if (_iconColor == Colors.blue) {
+            chatCubit.startRecording();
+          } else {
+            chatCubit.stopRecording();
+          }
           _iconColor = _iconColor == Colors.blue ? Colors.red : Colors.blue;
         });
       },

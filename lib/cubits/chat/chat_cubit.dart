@@ -2,8 +2,12 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:dart_openai/openai.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:project_alpha/cubits/chat_model/chat_model_cubit.dart';
 import 'package:project_alpha/models/chat_model.dart';
 import 'package:project_alpha/models/message.dart';
@@ -24,11 +28,11 @@ class ChatCubit extends Cubit<ChatState> {
 
   late final String _roomId;
   late final String _myUserId;
-  // late final String _prompt;
-  // late final String _modelId;
-  // late final String _modelPrompt;
-  // late final String _modelName;
   late final ChatModel _chatModel;
+
+  FlutterSoundRecorder _recorder = FlutterSoundRecorder();
+  String _filePath = '';
+  bool _isRecording = false;
 
   // String getModelName() => _modelName;
 
@@ -40,10 +44,6 @@ class ChatCubit extends Cubit<ChatState> {
     final data = (await supabase.from('rooms').select('''
           chat_models ( id, name, prompt, created_at )
         ''').eq('id', roomId).single())['chat_models'];
-
-    // _modelId = ;
-    // _modelName = data['name'];
-    // _modelPrompt = data['prompt'];
 
     _chatModel = ChatModel(
         id: data['id'],
@@ -65,7 +65,7 @@ class ChatCubit extends Cubit<ChatState> {
           if (_messages.isEmpty) {
             emit(ChatEmpty());
           } else {
-            emit(ChatLoaded(_messages, _chatModel));
+            emit(ChatLoaded(_messages, _chatModel, null));
           }
         });
   }
@@ -93,7 +93,7 @@ class ChatCubit extends Cubit<ChatState> {
         supabase.from('messages').insert(gptMessage.toMap()),
       ]);
 
-      emit(ChatLoaded(_messages, _chatModel));
+      emit(ChatLoaded(_messages, _chatModel, null));
 
       log("FINISHED!!!!!");
     } catch (e) {
@@ -112,7 +112,7 @@ class ChatCubit extends Cubit<ChatState> {
       isMine: true,
     );
     _messages.insert(0, message);
-    emit(ChatLoaded(_messages, _chatModel));
+    emit(ChatLoaded(_messages, _chatModel, null));
 
     try {
       await supabase.from('messages').insert(message.toMap());
@@ -120,8 +120,51 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');
-      emit(ChatLoaded(_messages, _chatModel));
+      emit(ChatLoaded(_messages, _chatModel, null));
     }
+  }
+
+  Future<void> _requestPermissions() async {
+    await Permission.microphone.request();
+  }
+
+  Future<void> _initializeRecorder() async {
+    await _recorder.openRecorder();
+  }
+
+  Future<void> startRecording() async {
+    _requestPermissions();
+    _initializeRecorder();
+
+    log("Start recording!!!");
+
+    final directory = await getApplicationDocumentsDirectory();
+    _filePath = '${directory.path}/audio_recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+
+    await _recorder.startRecorder(
+      toFile: _filePath,
+      codec: Codec.pcm16WAV,
+      numChannels: 1,
+      sampleRate: 16000,
+    );
+
+    _isRecording = true;
+  }
+
+  Future<void> stopRecording() async {
+    log("Stop Recording!!!");
+    await _recorder.stopRecorder();
+
+    _isRecording = false;
+
+    print('Audio saved to: $_filePath');
+
+    _recorder.closeRecorder();
+    _recorder.stopRecorder();
+
+    OpenAIAudioModel transcription = await GPT().getTranscript(_filePath);
+    log(transcription.text);
+    emit(ChatLoaded(_messages, _chatModel, transcription.text));
   }
 
   @override

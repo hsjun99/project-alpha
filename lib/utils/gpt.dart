@@ -58,7 +58,8 @@ class GPT {
     return chatCompletion;
   }
 
-  Future<OpenAIAudioModel> getTranscript(File audioFile) async {
+  Future<OpenAIAudioModel> getTranscript(String audioFilePath) async {
+    File audioFile = File(audioFilePath);
     OpenAIAudioModel transcription = await OpenAI.instance.audio.createTranscription(
       file: audioFile /* THE AUDIO FILE HERE */,
       model: "whisper-1",

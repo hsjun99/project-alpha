@@ -107,38 +107,47 @@ class _MessageBarState extends State<_MessageBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).cardColor,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: MediaQuery.of(context).padding.bottom,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                keyboardType: TextInputType.text,
-                maxLines: null,
-                autofocus: true,
-                controller: _textController,
-                decoration: const InputDecoration(
-                  hintText: 'Type a message',
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.all(8),
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        if (state is ChatLoaded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (state.audioText != null) _textController.text = state.audioText ?? '';
+          });
+        }
+        return Material(
+          color: Theme.of(context).cardColor,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 8,
+              left: 8,
+              right: 8,
+              bottom: MediaQuery.of(context).padding.bottom,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    maxLines: null,
+                    autofocus: true,
+                    controller: _textController,
+                    decoration: const InputDecoration(
+                      hintText: 'Type a message',
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.all(8),
+                    ),
+                  ),
                 ),
-              ),
+                TextButton(
+                  onPressed: () => _submitMessage(context),
+                  child: const Text('Send'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => _submitMessage(context),
-              child: const Text('Send'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
