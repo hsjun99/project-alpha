@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:project_alpha/cubits/profiles/profiles_cubit.dart';
 import 'package:project_alpha/pages/register_page.dart';

@@ -79,7 +79,6 @@ class RoomsPage extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final room = rooms[index];
                             final model = models[room.modelId];
-                            // final otherUser = profiles[room.otherUserId];
 
                             return ListTile(
                               onTap: () => Navigator.of(context).push(ChatPage.route(room.id)),
@@ -158,10 +157,13 @@ class _NewModels extends StatelessWidget {
             .map<Widget>((model) => InkWell(
                   onTap: () async {
                     try {
+                      log("hi");
                       final roomId = await BlocProvider.of<RoomCubit>(context).createRoom(
                           model.id, BlocProvider.of<ProfilesCubit>(context).myProfile?.id ?? '');
+                      log("roomid: $roomId");
                       Navigator.of(context).push(ChatPage.route(roomId));
-                    } catch (_) {
+                    } catch (e) {
+                      log(e.toString());
                       context.showErrorSnackBar(message: 'Failed creating a new room');
                     }
                   },

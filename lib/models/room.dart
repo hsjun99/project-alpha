@@ -38,7 +38,7 @@ class Room {
       : id = map['id'],
         modelId = map['chat_model_id'],
         createdAt = DateTime.parse(map['created_at']),
-        lastMessage = null;
+        lastMessage = map['last_message'];
 
   Room copyWith({
     String? id,
