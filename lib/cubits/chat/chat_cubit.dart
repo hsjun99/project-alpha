@@ -165,7 +165,7 @@ class ChatCubit extends Cubit<ChatState> {
     OpenAIAudioModel transcription = await GPT().getTranscript(_filePath);
     // log(transcription.text);
     emit(ChatLoaded(_messages, _chatModel, transcription.text));
-    sendMessage(transcription.text);
+    if (transcription.text.isNotEmpty) sendMessage(transcription.text);
   }
 
   @override
