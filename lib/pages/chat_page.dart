@@ -12,6 +12,7 @@ import 'package:project_alpha/models/chat_model.dart';
 import 'package:project_alpha/models/message.dart';
 import 'package:project_alpha/utils/constants.dart';
 import 'package:project_alpha/widgets/icons.dart';
+import 'package:project_alpha/widgets/typing_indicator.dart';
 import 'package:timeago/timeago.dart';
 
 /// Page to chat with someone.
@@ -55,6 +56,8 @@ class ChatPage extends StatelessWidget {
           } else if (state is ChatLoaded) {
             log("CHAT_LOADED!!!");
             final messages = state.messages;
+            log(messages.length.toString());
+            log(state.isTyping.toString());
             return Column(
               children: [
                 Expanded(
@@ -66,6 +69,13 @@ class ChatPage extends StatelessWidget {
                       final message = messages[index];
                       return _ChatBubble(message: message);
                     },
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: TypingIndicator(
+                    showIndicator: state.isTyping,
+                    bubbleColor: Theme.of(context).primaryColor,
                   ),
                 ),
                 const _MessageBar(),

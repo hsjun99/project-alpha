@@ -1,7 +1,17 @@
 PODS:
   - app_links (1.0.0):
     - FlutterMacOS
+  - audio_session (0.0.1):
+    - FlutterMacOS
+  - audioplayers_darwin (0.0.1):
+    - FlutterMacOS
+  - elevenlabs (0.0.1):
+    - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - just_audio (0.0.1):
+    - FlutterMacOS
+  - mic_stream (0.5.2):
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -12,7 +22,12 @@ PODS:
 
 DEPENDENCIES:
   - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
+  - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
+  - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos`)
+  - elevenlabs (from `Flutter/ephemeral/.symlinks/plugins/elevenlabs/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - just_audio (from `Flutter/ephemeral/.symlinks/plugins/just_audio/macos`)
+  - mic_stream (from `Flutter/ephemeral/.symlinks/plugins/mic_stream/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - sign_in_with_apple (from `Flutter/ephemeral/.symlinks/plugins/sign_in_with_apple/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
@@ -20,8 +35,18 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   app_links:
     :path: Flutter/ephemeral/.symlinks/plugins/app_links/macos
+  audio_session:
+    :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
+  audioplayers_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos
+  elevenlabs:
+    :path: Flutter/ephemeral/.symlinks/plugins/elevenlabs/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  just_audio:
+    :path: Flutter/ephemeral/.symlinks/plugins/just_audio/macos
+  mic_stream:
+    :path: Flutter/ephemeral/.symlinks/plugins/mic_stream/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   sign_in_with_apple:
@@ -31,7 +56,12 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_links: 4481ed4d71f384b0c3ae5016f4633aa73d32ff67
+  audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
+  audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
+  elevenlabs: 7341b1ffd7b109e5f3a32ef97385407ee17ff99f
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
+  mic_stream: c3bc8a10c5451a0f5ef75a54a75caf25a3d146c4
   path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
   sign_in_with_apple: a9e97e744e8edc36aefc2723111f652102a7a727
   url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451

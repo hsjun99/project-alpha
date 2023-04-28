@@ -65,16 +65,14 @@ class ChatCubit extends Cubit<ChatState> {
           if (_messages.isEmpty) {
             emit(ChatEmpty());
           } else {
-            emit(ChatLoaded(_messages, _chatModel, null));
+            emit(ChatLoaded(_messages, _chatModel, null, false));
           }
         });
   }
 
   Future<void> sendGPT(Message message) async {
-    final response = (await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content))
-        .choices[0]
-        .message
-        .content;
+    final responseData = await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content);
+    final response = responseData.choices[0].message.content;
 
     final gptMessage = Message(
       id: 'new',
@@ -86,7 +84,6 @@ class ChatCubit extends Cubit<ChatState> {
     );
 
     _messages.insert(0, gptMessage);
-    emit(ChatLoaded(_messages, _chatModel, null));
 
     try {
       await Future.wait([
@@ -95,6 +92,7 @@ class ChatCubit extends Cubit<ChatState> {
             .then((value) => SpeechPlayer().play(value)),
         supabase.from('messages').insert(gptMessage.toMap()),
       ]);
+      emit(ChatLoaded(_messages, _chatModel, null, false));
 
       log("FINISHED!!!!!");
     } catch (e) {
@@ -112,8 +110,9 @@ class ChatCubit extends Cubit<ChatState> {
       createdAt: DateTime.now(),
       isMine: true,
     );
+
     _messages.insert(0, message);
-    emit(ChatLoaded(_messages, _chatModel, null));
+    emit(ChatLoaded(_messages, _chatModel, null, true));
 
     try {
       await supabase.from('messages').insert(message.toMap());
@@ -121,7 +120,7 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');
-      emit(ChatLoaded(_messages, _chatModel, null));
+      emit(ChatLoaded(_messages, _chatModel, null, false));
     }
   }
 
@@ -164,8 +163,7 @@ class ChatCubit extends Cubit<ChatState> {
     _recorder.stopRecorder();
 
     OpenAIAudioModel transcription = await GPT().getTranscript(_filePath);
-    // log(transcription.text);
-    emit(ChatLoaded(_messages, _chatModel, transcription.text));
+
     if (transcription.text.isNotEmpty) sendMessage(transcription.text);
   }
 

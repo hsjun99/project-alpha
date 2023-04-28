@@ -6,10 +6,11 @@ abstract class ChatState {}
 class ChatInitial extends ChatState {}
 
 class ChatLoaded extends ChatState {
-  ChatLoaded(this.messages, this.chatModel, this.audioText);
+  ChatLoaded(this.messages, this.chatModel, this.audioText, this.isTyping);
   final List<Message> messages;
   final ChatModel chatModel;
   final String? audioText;
+  final bool isTyping;
 }
 
 // class ChatAudioTextLoaded extends ChatState {
