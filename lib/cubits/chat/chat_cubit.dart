@@ -76,35 +76,84 @@ class ChatCubit extends Cubit<ChatState> {
     //     });
   }
 
-  Future<void> sendGPT(Message message) async {
-    final responseData = await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content);
-    final response = responseData.choices[0].message.content;
+  sendGPTStream(Message message) async {
+    Stream messageStream = await GPT().getChatStream(_chatModel.prompt + '\n' + message.content);
+    String text = "";
+    bool isInitialized = false;
 
-    final gptMessage = Message(
-      id: 'new',
-      roomId: _roomId,
-      modelId: _chatModel.id,
-      content: response,
-      createdAt: DateTime.now(),
-      isMine: false,
+    messageStream.listen(
+      (event) {
+        final newText = event.choices.first.delta.content;
+        text += newText;
+        final gptMessage = Message(
+          id: 'new',
+          roomId: _roomId,
+          modelId: _chatModel.id,
+          content: text,
+          createdAt: DateTime.now(),
+          isMine: false,
+        );
+
+        if (!isInitialized) {
+          _messages.insert(0, gptMessage);
+          isInitialized = true;
+        } else {
+          _messages[0] = gptMessage;
+        }
+        emit(ChatLoaded(_messages, _chatModel, null, false));
+      },
+      onDone: () async {
+        try {
+          await Future.wait([
+            ElevenLabsAudio().generateAudioFile(text).then((value) => SpeechPlayer().play(value)),
+            supabase.from('messages').insert(Message(
+                  id: 'new',
+                  roomId: _roomId,
+                  modelId: _chatModel.id,
+                  content: text,
+                  createdAt: DateTime.now(),
+                  isMine: false,
+                ).toMap()),
+          ]);
+          // emit(ChatLoaded(_messages, _chatModel, null, false));
+
+          log("FINISHED!!!!!");
+        } catch (e) {
+          log(e.toString());
+        }
+      },
     );
-
-    _messages.insert(0, gptMessage);
-
-    try {
-      await Future.wait([
-        ElevenLabsAudio()
-            .generateAudioFile(gptMessage.content)
-            .then((value) => SpeechPlayer().play(value)),
-        supabase.from('messages').insert(gptMessage.toMap()),
-      ]);
-      emit(ChatLoaded(_messages, _chatModel, null, false));
-
-      log("FINISHED!!!!!");
-    } catch (e) {
-      log(e.toString());
-    }
   }
+
+  // Future<void> sendGPT(Message message) async {
+  //   final responseData = await GPT().getChatResponse(_chatModel.prompt + '\n' + message.content);
+  //   final response = responseData.choices[0].message.content;
+
+  //   final gptMessage = Message(
+  //     id: 'new',
+  //     roomId: _roomId,
+  //     modelId: _chatModel.id,
+  //     content: response,
+  //     createdAt: DateTime.now(),
+  //     isMine: false,
+  //   );
+
+  //   _messages.insert(0, gptMessage);
+
+  //   try {
+  //     await Future.wait([
+  //       ElevenLabsAudio()
+  //           .generateAudioFile(gptMessage.content)
+  //           .then((value) => SpeechPlayer().play(value)),
+  //       supabase.from('messages').insert(gptMessage.toMap()),
+  //     ]);
+  //     emit(ChatLoaded(_messages, _chatModel, null, false));
+
+  //     log("FINISHED!!!!!");
+  //   } catch (e) {
+  //     log(e.toString());
+  //   }
+  // }
 
   Future<void> sendMessage(String text) async {
     /// Add message to present to the user right away
@@ -122,7 +171,8 @@ class ChatCubit extends Cubit<ChatState> {
 
     try {
       await supabase.from('messages').insert(message.toMap());
-      await sendGPT(message);
+      // await sendGPT(message);
+      await sendGPTStream(message);
     } catch (_) {
       emit(ChatError('Error submitting message.'));
       _messages.removeWhere((message) => message.id == 'new');
