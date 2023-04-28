@@ -86,14 +86,15 @@ class ChatCubit extends Cubit<ChatState> {
     );
 
     _messages.insert(0, gptMessage);
+    emit(ChatLoaded(_messages, _chatModel, null));
 
     try {
       await Future.wait([
-        SpeechPlayer().play(await ElevenLabsAudio().generateAudioFile(gptMessage.content)),
+        ElevenLabsAudio()
+            .generateAudioFile(gptMessage.content)
+            .then((value) => SpeechPlayer().play(value)),
         supabase.from('messages').insert(gptMessage.toMap()),
       ]);
-
-      emit(ChatLoaded(_messages, _chatModel, null));
 
       log("FINISHED!!!!!");
     } catch (e) {
