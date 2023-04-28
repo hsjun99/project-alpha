@@ -23,7 +23,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   // final ChatModelsCubit chatModelsCubit;
 
-  StreamSubscription<List<Message>>? _messagesSubscription;
+  // StreamSubscription<List<Message>>? _messagesSubscription;
   List<Message> _messages = [];
 
   late final String _roomId;
@@ -51,23 +51,29 @@ class ChatCubit extends Cubit<ChatState> {
         prompt: data['prompt'],
         createdAt: DateTime.parse(data['created_at']));
 
-    _messagesSubscription = supabase
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .eq('room_id', roomId)
-        .order('created_at')
-        .map<List<Message>>(
-          (data) =>
-              data.map<Message>((row) => Message.fromMap(map: row, myUserId: _myUserId)).toList(),
-        )
-        .listen((messages) {
-          _messages = messages;
-          if (_messages.isEmpty) {
-            emit(ChatEmpty());
-          } else {
-            emit(ChatLoaded(_messages, _chatModel, null, false));
-          }
-        });
+    _messages = (await supabase.from('messages').select().eq('room_id', roomId).order('created_at'))
+        .map<Message>((row) => Message.fromMap(map: row, myUserId: _myUserId))
+        .toList();
+
+    emit(ChatLoaded(_messages, _chatModel, null, false));
+
+    // _messagesSubscription = supabase
+    //     .from('messages')
+    //     .stream(primaryKey: ['id'])
+    //     .eq('room_id', roomId)
+    //     .order('created_at')
+    //     .map<List<Message>>(
+    //       (data) =>
+    //           data.map<Message>((row) => Message.fromMap(map: row, myUserId: _myUserId)).toList(),
+    //     )
+    //     .listen((messages) {
+    //       _messages = messages;
+    //       if (_messages.isEmpty) {
+    //         emit(ChatEmpty());
+    //       } else {
+    //         emit(ChatLoaded(_messages, _chatModel, null, false));
+    //       }
+    //     });
   }
 
   Future<void> sendGPT(Message message) async {
@@ -169,7 +175,7 @@ class ChatCubit extends Cubit<ChatState> {
 
   @override
   Future<void> close() {
-    _messagesSubscription?.cancel();
+    // _messagesSubscription?.cancel();
     return super.close();
   }
 }
